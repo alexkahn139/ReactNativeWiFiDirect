@@ -183,14 +183,9 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
     }
 
     @ReactMethod
-    public void initWifiDirect(){
+    public void initWifiDirect(){ // Don't know if this is nessecary...
         Activity currentActivity = getCurrentActivity();
-        /*wifiP2pManager = (WifiP2pManager)currentActivity.getSystemService(Context.WIFI_P2P_SERVICE);
-        wifiDirectChannel = wifiP2pManager.initialize(context, context.getMainLooper(), new WifiP2pManager.ChannelListener() {
-            @Override
-            public void onChannelDisconnected() {
-            }
-        });*/
+
         Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
         currentActivity.startActivity(intent);
     }
