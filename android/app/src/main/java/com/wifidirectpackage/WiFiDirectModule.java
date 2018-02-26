@@ -203,7 +203,6 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
             }
         }
     };
-
     @ReactMethod
     public void wifiDirectConnect(String address){
         WifiP2pConfig config = new WifiP2pConfig();

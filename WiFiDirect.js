@@ -4,31 +4,38 @@ import {EventEmitter} from 'events'
 
 const WiFiDirect = NativeModules.WiFiDirectModule;
 
-export default class WiFiDirectModule  {
+export default class WiFiDirectModule extends EventEmitter {
 
-    // constructor (props) {
-    //     super(props)
-    //
-    //     this._services = {}
-    //     this._dListeners = {}
-    //
-    //     this.addDeviceListeners()
-    // }
-    //
-    // addDeviceListeners (){
-    //     if (Object.keys(this._dListeners).length){
-    //         return this.emit('error', new Error("WiFi-Direct listeners are already in place"))
-    //     }
-    //
-    // }
-    //
-    // /**
-    //  * Remove all event listeners and clean map
-    //  */
-    // removeDeviceListeners () {
-    //     Object.keys(this._dListeners).forEach(name => this._dListeners[name].remove())
-    //     this._dListeners = {}
-    // }
+    constructor (props) {
+        super(props)
+
+        this._services = {}
+        this._dListeners = {}
+
+        this.addDeviceListeners()
+    }
+
+    addDeviceListeners (){
+        if (Object.keys(this._dListeners).length){
+            return this.emit('error', new Error("WiFi-Direct listeners are already in place"))
+        }
+        this._dListeners.found = DeviceEventEmitter.addListener('discoverPeers', params => {
+            console.log(params)
+        })
+        this._dListeners.onWifiDirectPeers = DeviceEventEmitter.addListener('onWifiDirectPeers', params => {
+            console.log(params)
+        })
+
+
+    }
+
+    /**
+     * Remove all event listeners and clean map
+     */
+    removeDeviceListeners () {
+        Object.keys(this._dListeners).forEach(name => this._dListeners[name].remove())
+        this._dListeners = {}
+    }
 
     initWifiDirect(){
         // this._services= {}
