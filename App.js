@@ -12,6 +12,9 @@ import {
     View,
     Button
 } from 'react-native';
+import WiFiDirect from './WiFiDirect.js'
+const wifidirectmod = new WiFiDirect();
+console.log(WiFiDirect);
 
 const instructions = Platform.select({
     ios: 'Press Cmd+R to reload,\n' +
@@ -34,9 +37,13 @@ export default class App extends Component<Props> {
                 <Text style={styles.instructions}>
                     {instructions}
                 </Text>
-                <Button
-                    title="Start Discovery"
-                    color="#841584"
+                <Button onPress={wifidirectmod.initWifiDirect}
+                        title="Start init"
+                        color="#841584"
+                />
+                <Button onPress={wifidirectmod.discoverPeers}
+                        title="Start Discovery"
+                        color="#841584"
                 />
             </View>
         );
