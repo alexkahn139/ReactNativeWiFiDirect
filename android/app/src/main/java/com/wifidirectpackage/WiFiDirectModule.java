@@ -57,25 +57,12 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
     private WifiP2pInfo mWifiP2pInfo;
     private WifiP2pManager wifiP2pManager;
     private WifiP2pManager.Channel wifiDirectChannel;
-    private WifiP2pManager.PeerListListener mPeerListListener = new WifiP2pManager.PeerListListener(){
-        @Override
-        public void onPeersAvailable(WifiP2pDeviceList peersList) {
-            Collection<WifiP2pDevice> aList = peersList.getDeviceList();
-            Object[] arr = aList.toArray();
-            for (int i = 0; i < arr.length; i++) {
-                WifiP2pDevice a = (WifiP2pDevice) arr[i];
-                WritableMap params = Arguments.createMap();
-                params.putString("Address",a.deviceAddress);
-                params.putString("name",a.deviceName);
-                sendEvent("onWifiDirectPeers",params);
-            }
-        }
-    };
+
     private WifiP2pManager.ConnectionInfoListener mInfoListener = new WifiP2pManager.ConnectionInfoListener(){
         @Override
         public void onConnectionInfoAvailable(final WifiP2pInfo minfo) {
             if(minfo.isGroupOwner){
-                //服务器
+
                 mWifiP2pInfo = minfo;
                 WritableMap params = Arguments.createMap();
                 params.putString("type","server");
@@ -116,7 +103,6 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
                 };
                 mDataServerTask.execute();
             }else if(minfo.groupFormed){
-                //客户端
                 mWifiP2pInfo = minfo;
                 WritableMap params = Arguments.createMap();
                 params.putString("type","client");
@@ -191,7 +177,7 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
     }
 
     @ReactMethod
-    public void discoverPeers(){
+    public void discoverPeers(){ // This starts the discovery, real discovery happens in PeerListListener
         wifiP2pManager.discoverPeers(wifiDirectChannel,new WifiP2pManager.ActionListener(){
             @Override
             public void onSuccess() {
@@ -202,6 +188,21 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
             }
         });
     }
+
+    private WifiP2pManager.PeerListListener mPeerListListener = new WifiP2pManager.PeerListListener(){
+        @Override
+        public void onPeersAvailable(WifiP2pDeviceList peersList) {
+            Collection<WifiP2pDevice> aList = peersList.getDeviceList();
+            Object[] arr = aList.toArray();
+            for (int i = 0; i < arr.length; i++) {
+                WifiP2pDevice a = (WifiP2pDevice) arr[i];
+                WritableMap params = Arguments.createMap();
+                params.putString("Address",a.deviceAddress);
+                params.putString("name",a.deviceName);
+                sendEvent("onWifiDirectPeers",params);
+            }
+        }
+    };
 
     @ReactMethod
     public void wifiDirectConnect(String address){
