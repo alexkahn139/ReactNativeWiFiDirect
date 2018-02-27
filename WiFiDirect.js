@@ -9,8 +9,8 @@ export default class WiFiDirectModule extends EventEmitter {
     constructor (props) {
         super(props)
 
-        this._services = {}
-        this._dListeners = {}
+        this._devices = {};
+        this._dListeners = {};
 
         this.addDeviceListeners()
     }
@@ -20,13 +20,15 @@ export default class WiFiDirectModule extends EventEmitter {
             return this.emit('error', new Error("WiFi-Direct listeners are already in place"))
         }
         this._dListeners.found = DeviceEventEmitter.addListener('discoverPeers', params => {
-            console.log(params)
-        })
+            console.log(params);
+            this._devices.add(params);
+            console.log(this._devices);
+        });
         this._dListeners.onWifiDirectPeers = DeviceEventEmitter.addListener('onWifiDirectPeers', params => {
-            console.log(params)
-        })
-
-
+            console.log(params);
+            this._devices.add(params);
+            console.log(this._devices);
+        });
     }
 
     /**
@@ -44,10 +46,14 @@ export default class WiFiDirectModule extends EventEmitter {
         WiFiDirect.initWifiDirect()
     }
     discoverPeers(){
-        // this._services= {}
+        this._devices= {}
         // this.emit('update')
         console.log("Clicked Discover")
         WiFiDirect.discoverPeers()
+    }
+
+    getDevices(){
+        return this._devices;
     }
 
 
