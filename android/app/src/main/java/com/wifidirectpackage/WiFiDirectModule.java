@@ -12,6 +12,7 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.AsyncTask;
 import android.os.Looper;
@@ -63,6 +64,7 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
     private WifiP2pManager wifiP2pManager;
     private WifiP2pManager.Channel wifiDirectChannel;
     private WifiP2pDnsSdServiceRequest serviceRequest;
+    private int port =  8888;
 
 
     private WifiP2pManager.ConnectionInfoListener mInfoListener = new WifiP2pManager.ConnectionInfoListener(){
@@ -78,7 +80,7 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
                     @Override
                     protected String doInBackground(Void... params) {
                         try {
-                            ServerSocket serverSocket = new ServerSocket(8888);
+                            ServerSocket serverSocket = new ServerSocket(port);
                             Socket client = serverSocket.accept();
                             InputStream inputStream = client.getInputStream();
                             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -182,6 +184,39 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
         Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
         currentActivity.startActivity(intent);
     }
+
+    @ReactMethod
+    public void startRegistration(String buddyName) {
+        //  Create a string map containing information about your service.
+        Map record = new HashMap();
+        record.put("listenport", String.valueOf(port));
+        record.put("buddyname", buddyName + (int) (Math.random() * 1000));
+        record.put("available", "visible");
+
+        // Service information.  Pass it an instance name, service type
+        // _protocol._transportlayer , and the map containing
+        // information other devices will want once they connect to this one.
+        WifiP2pDnsSdServiceInfo serviceInfo =
+                WifiP2pDnsSdServiceInfo.newInstance("_Tourism recommender", "_presence._tcp", record);
+
+        // Add the local service, sending the service info, network channel,
+        // and listener that will be used to indicate success or failure of
+        // the request.
+        wifiP2pManager.addLocalService(wifiDirectChannel , serviceInfo, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                // Command successful! Code isn't necessarily needed here,
+                // Unless you want to update the UI or add logging statements.
+            }
+
+            @Override
+            public void onFailure(int arg0) {
+                // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+            }
+        });
+    }
+
+
 
     @ReactMethod
     public void discoverPeers(){ // This starts the discovery, real discovery happens in PeerListListener
