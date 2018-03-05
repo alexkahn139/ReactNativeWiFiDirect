@@ -62,7 +62,8 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
     private WifiP2pInfo mWifiP2pInfo;
     private WifiP2pManager wifiP2pManager;
     private WifiP2pManager.Channel wifiDirectChannel;
-    public WifiP2pDnsSdServiceRequest serviceRequest;
+    private WifiP2pDnsSdServiceRequest serviceRequest;
+
 
     private WifiP2pManager.ConnectionInfoListener mInfoListener = new WifiP2pManager.ConnectionInfoListener(){
         @Override
@@ -238,9 +239,9 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
 
                 // Update the device name with the human-friendly version from
                 // the DnsTxtRecord, assuming one arrived.
-                resourceType.deviceName = buddies
-                        .containsKey(resourceType.deviceAddress) ? buddies
-                        .get(resourceType.deviceAddress) : resourceType.deviceName;
+//                resourceType.deviceName = buddies
+//                        .containsKey(resourceType.deviceAddress) ? buddies
+//                        .get(resourceType.deviceAddress) : resourceType.deviceName;
 
 //                // Add to the custom adapter defined specifically for showing
 //                // wifi devices.
@@ -251,7 +252,16 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
 //
 //                adapter.add(resourceType);
 //                adapter.notifyDataSetChanged();
-                Log.d(TAG, "onBonjourServiceAvailable " + instanceName);
+
+
+                for (Object value : buddies.values()) {
+                    WifiP2pDevice a = (WifiP2pDevice) value;
+                    WritableMap params = Arguments.createMap();
+                    params.putString("Address", a.deviceAddress);
+                    params.putString("name", a.deviceName);
+                    sendEvent("onWifiDirectPeers", params);
+                }
+                Log.d(TAG, "onBonjourServiceAvailable " + resourceType + instanceName);
             }
         };
 
