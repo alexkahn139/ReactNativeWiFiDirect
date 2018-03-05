@@ -58,4 +58,3 @@ export default class WiFiDirectModule extends EventEmitter {
 
 
 }
-/////
