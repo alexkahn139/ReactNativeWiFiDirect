@@ -12,6 +12,8 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.provider.Settings;
@@ -35,6 +37,10 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by alexandre on 25/02/2018.
@@ -57,6 +63,9 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
     private WifiP2pInfo mWifiP2pInfo;
     private WifiP2pManager wifiP2pManager;
     private WifiP2pManager.Channel wifiDirectChannel;
+    private WifiP2pDnsSdServiceRequest serviceRequest;
+    private int port =  8888;
+
 
     private WifiP2pManager.ConnectionInfoListener mInfoListener = new WifiP2pManager.ConnectionInfoListener(){
         @Override
@@ -71,7 +80,7 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
                     @Override
                     protected String doInBackground(Void... params) {
                         try {
-                            ServerSocket serverSocket = new ServerSocket(8888);
+                            ServerSocket serverSocket = new ServerSocket(port);
                             Socket client = serverSocket.accept();
                             InputStream inputStream = client.getInputStream();
                             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -169,12 +178,45 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
     }
 
     @ReactMethod
-    public void initWifiDirect(){ // Don't know if this is nessecary...
+    public void initWifiDirect(){ // Opens the WiFi settings
         Activity currentActivity = getCurrentActivity();
 
         Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
         currentActivity.startActivity(intent);
     }
+
+    @ReactMethod
+    public void startRegistration(String buddyName) {
+        //  Create a string map containing information about your service.
+        Map record = new HashMap();
+        record.put("listenport", String.valueOf(port));
+        record.put("buddyname", buddyName + (int) (Math.random() * 1000));
+        record.put("available", "visible");
+
+        // Service information.  Pass it an instance name, service type
+        // _protocol._transportlayer , and the map containing
+        // information other devices will want once they connect to this one.
+        WifiP2pDnsSdServiceInfo serviceInfo =
+                WifiP2pDnsSdServiceInfo.newInstance("_Tourism recommender", "_presence._tcp", record);
+
+        // Add the local service, sending the service info, network channel,
+        // and listener that will be used to indicate success or failure of
+        // the request.
+        wifiP2pManager.addLocalService(wifiDirectChannel , serviceInfo, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                // Command successful! Code isn't necessarily needed here,
+                // Unless you want to update the UI or add logging statements.
+            }
+
+            @Override
+            public void onFailure(int arg0) {
+                // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+            }
+        });
+    }
+
+
 
     @ReactMethod
     public void discoverPeers(){ // This starts the discovery, real discovery happens in PeerListListener
@@ -203,8 +245,94 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
             }
         }
     };
+
+    final HashMap<String, String> buddies = new HashMap<String, String>();
+
+
     @ReactMethod
-    public void wifiDirectConnect(String address){
+    private void discoverServices() {
+
+        WifiP2pManager.DnsSdTxtRecordListener txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
+            @Override
+        /* Callback includes:
+         * fullDomain: full domain name: e.g "printer._ipp._tcp.local."
+         * record: TXT record dta as a map of key/value pairs.
+         * device: The device running the advertised service.
+         */
+
+            public void onDnsSdTxtRecordAvailable(
+                    String fullDomain, Map record, WifiP2pDevice device) {
+                Log.d(TAG, "DnsSdTxtRecord available -" + record.toString());
+                buddies.put(device.deviceAddress, (String) record.get("buddyname"));
+            }
+        };
+
+        WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
+            @Override
+            public void onDnsSdServiceAvailable(String instanceName, String registrationType,
+                                                WifiP2pDevice resourceType) {
+
+                // Update the device name with the human-friendly version from
+                // the DnsTxtRecord, assuming one arrived.
+//                resourceType.deviceName = buddies
+//                        .containsKey(resourceType.deviceAddress) ? buddies
+//                        .get(resourceType.deviceAddress) : resourceType.deviceName;
+
+//                // Add to the custom adapter defined specifically for showing
+//                // wifi devices.
+//                WiFiDirectServicesList fragment = (WiFiDirectServicesList) getFragmentManager()
+//                        .findFragmentById(R.id.frag_peerlist);
+//                WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment
+//                        .getListAdapter());
+//
+//                adapter.add(resourceType);
+//                adapter.notifyDataSetChanged();
+
+
+                for (Object value : buddies.values()) {
+                    WifiP2pDevice a = (WifiP2pDevice) value;
+                    WritableMap params = Arguments.createMap();
+                    params.putString("Address", a.deviceAddress);
+                    params.putString("name", a.deviceName);
+                    sendEvent("onWifiDirectPeers", params);
+                }
+                Log.d(TAG, "onBonjourServiceAvailable " + resourceType + instanceName);
+            }
+        };
+
+        wifiP2pManager.setDnsSdResponseListeners(wifiDirectChannel, servListener, txtListener);
+
+        serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+        wifiP2pManager.addServiceRequest(wifiDirectChannel, serviceRequest,
+                new WifiP2pManager.ActionListener() {
+
+                    @Override
+                    public void onSuccess() {
+                        Log.v(TAG,"Added service discovery request");
+                    }
+
+                    @Override
+                    public void onFailure(int arg0) {
+                        Log.v(TAG,"Failed adding service discovery request");
+                    }
+                });
+        wifiP2pManager.discoverServices(wifiDirectChannel, new WifiP2pManager.ActionListener() {
+
+            @Override
+            public void onSuccess() {
+                Log.v(TAG,"Service discovery initiated");
+            }
+
+            @Override
+            public void onFailure(int arg0) {
+                Log.v(TAG,"Service discovery failed");
+
+            }
+        });
+    }
+
+    @ReactMethod
+    public void wifiDirectConnectToPeer(String address){
         WifiP2pConfig config = new WifiP2pConfig();
         config.deviceAddress = address;
         wifiP2pManager.connect(wifiDirectChannel,config,new WifiP2pManager.ActionListener() {
