@@ -53,18 +53,22 @@ export default class WiFiDirectModule extends EventEmitter {
     initWifiDirect(){
         // this._services= {}
         // this.emit('update')
-        console.log("Clicked init")
+        console.log("Clicked init");
         WiFiDirect.initWifiDirect()
     }
+    registerService(name){
+        console.log("Clicked register");
+        WiFiDirect.startRegistration(name);
+    }
     discoverPeers(){
-        this._devices= {}
+        this._devices= {};
         // this.emit('update')
-        console.log("Clicked Discover services")
-        WiFiDirect.discoverPeers()
+        console.log("Clicked Discover services");
+        WiFiDirect.discoverPeers();
     }
     discoverServices(){
-        console.log("Clicked Discover services")
-        WiFiDirect.
+        console.log("Clicked Discover services");
+        WiFiDirect.discoverServices();
     }
 
     getDevices(){
