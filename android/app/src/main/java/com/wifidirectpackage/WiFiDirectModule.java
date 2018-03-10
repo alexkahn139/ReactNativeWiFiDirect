@@ -274,19 +274,23 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
 
                 // Update the device name with the human-friendly version from
                 // the DnsTxtRecord, assuming one arrived.
-//                resourceType.deviceName = buddies
-//                        .containsKey(resourceType.deviceAddress) ? buddies
-//                        .get(resourceType.deviceAddress) : resourceType.deviceName;
+                resourceType.deviceName = buddies
+                        .containsKey(resourceType.deviceAddress) ? buddies
+                        .get(resourceType.deviceAddress) : resourceType.deviceName;
 
 //                // Add to the custom adapter defined specifically for showing
 //                // wifi devices.
 //                WiFiDirectServicesList fragment = (WiFiDirectServicesList) getFragmentManager()
 //                        .findFragmentById(R.id.frag_peerlist);
 //                WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment
-//                        .getListAdapter());
+//          sudo lsof -i :8081              .getListAdapter());
 //
 //                adapter.add(resourceType);
 //                adapter.notifyDataSetChanged();
+                WritableMap serviceParams = Arguments.createMap();
+                serviceParams.putString("Address", resourceType.deviceAddress);
+                serviceParams.putString("name", resourceType.deviceName);
+                sendEvent("onWifiDirectServices", serviceParams);
 
 
                 for (Object value : buddies.values()) {
@@ -294,7 +298,7 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
                     WritableMap params = Arguments.createMap();
                     params.putString("Address", a.deviceAddress);
                     params.putString("name", a.deviceName);
-                    sendEvent("onWifiDirectPeers", params);
+                    sendEvent("onWifiDirectServices", params);
                 }
                 Log.d(TAG, "onBonjourServiceAvailable " + resourceType + instanceName);
             }
