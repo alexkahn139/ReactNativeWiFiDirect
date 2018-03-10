@@ -42,7 +42,15 @@ export default class App extends Component<Props> {
                         color="#841584"
                 />
                 <Button onPress={wifidirectmod.discoverPeers}
-                        title="Start Discovery"
+                        title="Start Peer Discovery"
+                        color="#841584"
+                />
+                <Button onPress={wifidirectmod.registerService}
+                        title="Start registration"
+                        color="#841584"
+                />
+                <Button onPress={wifidirectmod.discoverServices}
+                        title="Start Service Discovery"
                         color="#841584"
                 />
             </View>
