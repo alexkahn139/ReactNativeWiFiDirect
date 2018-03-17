@@ -66,6 +66,12 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
     private WifiP2pDnsSdServiceRequest serviceRequest;
     private int port =  8888;
 
+    // Toast for debugging
+    int duration = Toast.LENGTH_SHORT;
+
+
+
+
 
     private WifiP2pManager.ConnectionInfoListener mInfoListener = new WifiP2pManager.ConnectionInfoListener(){
         @Override
@@ -242,6 +248,8 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
                 params.putString("Address",a.deviceAddress);
                 params.putString("name",a.deviceName);
                 sendEvent("onWifiDirectPeers",params);
+                CharSequence text = "found peer";
+                Toast.makeText(context, text, duration).show();
             }
         }
     };
@@ -291,15 +299,17 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
                 serviceParams.putString("Address", resourceType.deviceAddress);
                 serviceParams.putString("name", resourceType.deviceName);
                 sendEvent("onWifiDirectServices", serviceParams);
+                CharSequence text = "found service";
+                Toast.makeText(context, text, duration).show();
 
 
-                for (Object value : buddies.values()) {
-                    WifiP2pDevice a = (WifiP2pDevice) value;
-                    WritableMap params = Arguments.createMap();
-                    params.putString("Address", a.deviceAddress);
-                    params.putString("name", a.deviceName);
-                    sendEvent("onWifiDirectServices", params);
-                }
+//                for (Object value : buddies.values()) {
+//                    WifiP2pDevice a = (WifiP2pDevice) value;
+//                    WritableMap params = Arguments.createMap();
+//                    params.putString("Address", a.deviceAddress);
+//                    params.putString("name", a.deviceName);
+//                    sendEvent("onWifiDirectServices", params);
+//                }
                 Log.d(TAG, "onBonjourServiceAvailable " + resourceType + instanceName);
             }
         };
