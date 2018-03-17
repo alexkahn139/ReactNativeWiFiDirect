@@ -246,7 +246,7 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
                 WifiP2pDevice a = (WifiP2pDevice) arr[i];
                 WritableMap params = Arguments.createMap();
                 params.putString("Address",a.deviceAddress);
-                params.putString("name",a.deviceName);
+                params.putString("Device Name",a.deviceName);
                 sendEvent("onWifiDirectPeers",params);
                 CharSequence text = "found peer";
                 Toast.makeText(context, text, duration).show();
@@ -286,30 +286,14 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
                         .containsKey(resourceType.deviceAddress) ? buddies
                         .get(resourceType.deviceAddress) : resourceType.deviceName;
 
-//                // Add to the custom adapter defined specifically for showing
-//                // wifi devices.
-//                WiFiDirectServicesList fragment = (WiFiDirectServicesList) getFragmentManager()
-//                        .findFragmentById(R.id.frag_peerlist);
-//                WiFiDevicesAdapter adapter = ((WiFiDevicesAdapter) fragment
-//          sudo lsof -i :8081              .getListAdapter());
-//
-//                adapter.add(resourceType);
-//                adapter.notifyDataSetChanged();
+
                 WritableMap serviceParams = Arguments.createMap();
                 serviceParams.putString("Address", resourceType.deviceAddress);
-                serviceParams.putString("name", resourceType.deviceName);
+                serviceParams.putString("Buddy Name", resourceType.deviceName);
                 sendEvent("onWifiDirectServices", serviceParams);
                 CharSequence text = "found service";
-                Toast.makeText(context, text, duration).show();
+//                Toast.makeText(context, text, duration).show();
 
-
-//                for (Object value : buddies.values()) {
-//                    WifiP2pDevice a = (WifiP2pDevice) value;
-//                    WritableMap params = Arguments.createMap();
-//                    params.putString("Address", a.deviceAddress);
-//                    params.putString("name", a.deviceName);
-//                    sendEvent("onWifiDirectServices", params);
-//                }
                 Log.d(TAG, "onBonjourServiceAvailable " + resourceType + instanceName);
             }
         };
