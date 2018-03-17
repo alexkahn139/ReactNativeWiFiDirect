@@ -67,7 +67,7 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
     private int port =  8888;
 
     // Toast for debugging
-    int duration = Toast.LENGTH_SHORT;
+//    int duration = Toast.LENGTH_SHORT;
 
 
 
@@ -248,8 +248,8 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
                 params.putString("Address",a.deviceAddress);
                 params.putString("Device Name",a.deviceName);
                 sendEvent("onWifiDirectPeers",params);
-                CharSequence text = "found peer";
-                Toast.makeText(context, text, duration).show();
+//                CharSequence text = "found peer";
+//                Toast.makeText(context, text, duration).show();
             }
         }
     };
