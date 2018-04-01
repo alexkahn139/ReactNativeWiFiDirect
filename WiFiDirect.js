@@ -12,8 +12,6 @@ export default class WiFiDirectModule extends EventEmitter {
     constructor (props) {
         super(props)
 
-        this._devices = {};
-        this._services = {};
         this._dListeners = {};
 
         this.addDeviceListeners()
@@ -69,7 +67,10 @@ export default class WiFiDirectModule extends EventEmitter {
     }
 
     getDevices(){
-        return this._devices;
+        return devices;
+    }
+    getServices(){
+        return services;
     }
 
 

@@ -1,0 +1,52 @@
+{
+    "cordova-plugin-whitelist": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-whitelist@1"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-iosrtc": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/eface2face/cordova-plugin-iosrtc.git",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-crosswalk-webview": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-crosswalk-webview"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-networkinterface": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-networkinterface"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-device": {
+        "source": {
+            "type": "git",
+            "url": "https://git-wip-us.apache.org/repos/asf/cordova-plugin-device.git",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-zeroconf": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-zeroconf"
+        },
+        "is_top_level": true,
+        "variables": {}
+    }
+}
