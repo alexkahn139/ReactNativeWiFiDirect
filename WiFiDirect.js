@@ -7,7 +7,14 @@ const WiFiDirect = NativeModules.WiFiDirectModule;
 var devices = [];
 var services= [];
 
+var watchfulltype = "";
+var watchflag = false;
+var watchcallback = null;
+
+
+
 export default class WiFiDirectModule extends EventEmitter {
+
 
     constructor (props) {
         super(props)
@@ -33,6 +40,11 @@ export default class WiFiDirectModule extends EventEmitter {
             console.log("Direct Service");
             services.push(params);
             console.log(services);
+            if (watchflag) {
+                if (watchfulltype === params.name){
+                    watchcallback();
+                }
+                    }
         });
     }
 
@@ -50,9 +62,9 @@ export default class WiFiDirectModule extends EventEmitter {
         console.log("Clicked init");
         WiFiDirect.initWifiDirect()
     }
-    registerService(){
+    registerService(serviceName){
         console.log("Clicked register");
-        WiFiDirect.startRegistration("AlexKahn");
+        WiFiDirect.startRegistration(serviceName);
     }
     discoverPeers(){
         devices= [];
@@ -65,12 +77,22 @@ export default class WiFiDirectModule extends EventEmitter {
         console.log("Clicked Discover services");
         WiFiDirect.discoverServices();
     }
+    connectService(address){
+        console.log("Connect to " + address);
+        WiFiDirect.wifiDirectConnectToPeer(address);
+    }
 
     getDevices(){
         return devices;
     }
     getServices(){
         return services;
+    }
+
+
+    watch(fulltype, succes) {
+        watchflag = true;
+        watchcallback = succes;
     }
 
 

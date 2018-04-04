@@ -289,7 +289,7 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
 
                 WritableMap serviceParams = Arguments.createMap();
                 serviceParams.putString("Address", resourceType.deviceAddress);
-                serviceParams.putString("Buddy Name", resourceType.deviceName);
+                serviceParams.putString("Name", resourceType.deviceName);
                 sendEvent("onWifiDirectServices", serviceParams);
                 CharSequence text = "found service";
 //                Toast.makeText(context, text, duration).show();
