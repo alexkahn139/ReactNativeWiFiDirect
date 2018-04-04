@@ -65,11 +65,15 @@ function Network(resolve){
                     var action  = result.action;
                     var service = result.service;
                     var name    = service.name;
+                    var address = service.name;
 
                     // Because the IP will be renegotiated after
-                    if (name!== reactNativePlugin.Platform.address){
+                    if (address!== reactNativePlugin.Platform.address){
                         // Only connect with other devices not with itself
-                        wifidirect.
+                        wifidirect.connect(address);
+                        // First we need to connect
+                        // Then check who is the GO
+                        // Than the GO can open a socket with the client
                     }
 
                 })
