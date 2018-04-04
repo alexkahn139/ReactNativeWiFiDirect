@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -346,6 +347,42 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
 
             }
         });
+    }
+
+    public void onConnectionInfoAvailable(final WifiP2pInfo info) {
+
+        // InetAddress from WifiP2pInfo struct.
+        String groupOwnerAddress = info.groupOwnerAddress.getHostAddress();
+
+        // After the group negotiation, we can determine the group owner
+        // (server).
+        if (info.groupFormed && info.isGroupOwner) {
+            // Do whatever tasks are specific to the group owner.
+            // One common case is creating a group owner thread and accepting
+            // incoming connections.
+
+            // Idea: Send the information that it is the GO to JavaScript
+            // Let the client connect to the GO
+
+            WritableMap groupOwnerParams = Arguments.createMap();
+            groupOwnerParams.putBoolean("groupowner", true);
+            groupOwnerParams.putString("groupOwnerAddress", groupOwnerAddress);
+            sendEvent("ifGroupOwner", groupOwnerParams);
+        } else if (info.groupFormed) {
+            // The other device acts as the peer (client). In this case,
+            // you'll want to create a peer thread that connects
+            // to the group owner.
+
+            // Idea: Sent the information that it isn't the GO to JavaScript
+            // Sent the IP of the GO to the JS
+            // Connect via the JS to the GO
+
+            WritableMap groupOwnerParams = Arguments.createMap();
+            groupOwnerParams.putBoolean("groupowner", false);
+            groupOwnerParams.putString("groupOwnerAddress", groupOwnerAddress);
+            sendEvent("ifNotGroupOwner", groupOwnerParams);
+
+        }
     }
 
     @ReactMethod
