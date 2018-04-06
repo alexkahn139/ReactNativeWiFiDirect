@@ -286,10 +286,11 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
                 resourceType.deviceName = buddies
                         .containsKey(resourceType.deviceAddress) ? buddies
                         .get(resourceType.deviceAddress) : resourceType.deviceName;
+                resourceType.
 
 
                 WritableMap serviceParams = Arguments.createMap();
-                serviceParams.putString("Address", resourceType.deviceAddress);
+                serviceParams.putString("MacAddress", resourceType.deviceAddress);
                 serviceParams.putString("Name", resourceType.deviceName);
                 sendEvent("onWifiDirectServices", serviceParams);
                 CharSequence text = "found service";
@@ -349,14 +350,14 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
         });
     }
 
-    public void onConnectionInfoAvailable(final WifiP2pInfo info) {
+    private void onConnectionInfoAvailable(final WifiP2pInfo info) {
 
         // InetAddress from WifiP2pInfo struct.
         String groupOwnerAddress = info.groupOwnerAddress.getHostAddress();
 
         // After the group negotiation, we can determine the group owner
         // (server).
-        if (info.groupFormed && info.isGroupOwner) {
+        if (info.groupFormed) {
             // Do whatever tasks are specific to the group owner.
             // One common case is creating a group owner thread and accepting
             // incoming connections.
@@ -365,24 +366,16 @@ public class WiFiDirectModule extends ReactContextBaseJavaModule implements Life
             // Let the client connect to the GO
 
             WritableMap groupOwnerParams = Arguments.createMap();
-            groupOwnerParams.putBoolean("groupowner", true);
+            groupOwnerParams.putBoolean("groupOwner", info.isGroupOwner);
             groupOwnerParams.putString("groupOwnerAddress", groupOwnerAddress);
-            sendEvent("ifGroupOwner", groupOwnerParams);
-        } else if (info.groupFormed) {
-            // The other device acts as the peer (client). In this case,
-            // you'll want to create a peer thread that connects
-            // to the group owner.
-
-            // Idea: Sent the information that it isn't the GO to JavaScript
-            // Sent the IP of the GO to the JS
-            // Connect via the JS to the GO
-
-            WritableMap groupOwnerParams = Arguments.createMap();
-            groupOwnerParams.putBoolean("groupowner", false);
-            groupOwnerParams.putString("groupOwnerAddress", groupOwnerAddress);
-            sendEvent("ifNotGroupOwner", groupOwnerParams);
+            sendEvent("onIfGroupOwner", groupOwnerParams);
 
         }
+    }
+
+    @ReactMethod
+    public void getGroupOwnerInfo(){
+        onConnectionInfoAvailable(mWifiP2pInfo);
     }
 
     @ReactMethod
