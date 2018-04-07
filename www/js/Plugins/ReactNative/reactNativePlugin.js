@@ -36,7 +36,7 @@ function Platform(resolve) {
     -resolve(reactNativePlugin);
 }
 
-function Network(resolve){
+function Network(resolve) {
     this.createBonjourService = function (args) {
         var serviceObject = {
             name: args.name,
@@ -45,7 +45,7 @@ function Network(resolve){
 
             fulltype: args.type + '.' + args.domain,
 
-            publish: function(args) {
+            publish: function (args) {
                 wifidirect.registerService(args);
             }
         }
@@ -54,35 +54,61 @@ function Network(resolve){
 
     this.createBonjourBrowser = function (args) {
         var browserObj = {
-            type:     args.serviceType,
-            domain:   args.domain,
+            type: args.serviceType,
+            domain: args.domain,
             fulltype: args.serviceType + '.' + args.domain,
             eventEmitter: new EventEmitter(), // Browser needs its own event handler in order not to interfere with other service browsers.
 
-        search: function () {
-                var evntEmitter = this.eventEmitter;
+            search: function () {
+                //var evntEmitter = this.eventEmitter;
                 wifidirect.watch(this.fulltype, function (result) {
-                    var action  = result.action;
+                    var action = result.action;
                     var service = result.service;
-                    var name    = service.name;
-                    var address = service.name;
+                    var name = service.name;
+                    var address = service.address;
+
+                    var socket;
+                    var simplifiedSocket = service.txtRecord;
 
                     // Because the IP will be renegotiated after
-                    if (address!== reactNativePlugin.Platform.address){
+                    if (address !== DeviceInfo.getIPAddress) {
                         // Only connect with other devices not with itself
-                        wifidirect.connect(address);
                         // First we need to connect
                         // Then check who is the GO
-                        // Than the GO can open a socket with the client
-                    }
+                        // If it is the GO it has the IP of the client,
 
+                        socket = reactNativePlugin.Network.createTCPSocket({
+                            hostname: name,
+                            port: 4000, // random for now
+                        })
+                    }
+                    var discoveredService = {
+                        "name": name,
+                        "socket": null,
+                        resolve: function () {
+                            this.socket = socket;
+
+                        }
+                    }
                 })
 
-        }
 
-        }
+            }
+            ,
+            addEventListener: function (name, callback) {
+                this.eventEmitter.addListener(name, callback);
 
-    }
+            }
 
 
+        };
+        return browserObj;
+    };
+
+    this.createTCPSocket = function(args) {
+        return new Sockets.Socket(args);
+    };
 }
+
+module.exports.plugin = reactNativePlugin;
+module.exports.EventEmitter = EventEmitter;
